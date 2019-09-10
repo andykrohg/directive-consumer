@@ -97,7 +97,7 @@ public class DirectiveProcessor extends ConsumerRoute implements Processor{
 				key = "arrow-" + consensus;
 			}
 			
-			Process process = Runtime.getRuntime().exec("/Users/akrohg/projects/cliclick/cliclick kd:" + key + " w:125 ku:" + key);
+			Process process = Runtime.getRuntime().exec("src/main/resources/cliclick kd:" + key + " w:125 ku:" + key);
 			process.waitFor();
 			time = System.currentTimeMillis();
 		}
