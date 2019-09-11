@@ -14,20 +14,21 @@ import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Component;
+
+import com.redhat.dm.DroolsBeanFactory;
 
 @Component
 public class ConsumerRoute extends RouteBuilder {
-	protected long time = System.currentTimeMillis();
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_RESET = "\u001B[0m";
-
 	protected List<Map<String, String>> redInputs = new ArrayList<Map<String, String>>();
 	protected List<Map<String, String>> whiteInputs = new ArrayList<Map<String, String>>();
 	
 	protected RemoteCache<String, Integer> redUserData;
 	protected RemoteCache<String, Integer> whiteUserData;
 	
+	protected final KieSession redKieSession = new DroolsBeanFactory().getKieSession();
+	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
 	@Override
 	public void configure() throws Exception {
@@ -60,11 +61,13 @@ public class ConsumerRoute extends RouteBuilder {
 		from("kafka:directive-red?synchronous=true")
 			.streamCaching()
 			.unmarshal().json(JsonLibrary.Jackson, Map.class)
-			.process(new DirectiveProcessor(redUserData, redInputs, "red"));    
+			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));    
 		
 		from("kafka:directive-white?synchronous=true")
 		.streamCaching()
 		.unmarshal().json(JsonLibrary.Jackson, Map.class)
-		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white"));
+		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
 	}
+	
+	
 }
