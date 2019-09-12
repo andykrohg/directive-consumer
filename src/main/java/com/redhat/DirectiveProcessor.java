@@ -45,7 +45,7 @@ public class DirectiveProcessor implements Processor {
 
 		final Map<String, Long> totals = inputs.stream()
 				.collect(Collectors.groupingBy(map -> map.get("direction").toString(), Collectors.counting()));
-		final String consensus = determineConsensus();
+		final String consensus = determineConsensus(totals);
 
 		System.out.println("Consensus:" + consensus);
 
@@ -110,8 +110,8 @@ public class DirectiveProcessor implements Processor {
 		time = System.currentTimeMillis();
 	}
 
-	public String determineConsensus() {
-		kieSession.insert(inputs);
+	public String determineConsensus(Map<String, Long> totals) {
+		kieSession.insert(totals);
 		kieSession.fireAllRules();
 		return kieSession.getGlobal("direction").toString();
 	}
