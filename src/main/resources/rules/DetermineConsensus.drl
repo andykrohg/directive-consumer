@@ -1,0 +1,15 @@
+package rules;
+
+import java.util.Map;
+global java.lang.String direction;
+
+dialect  "mvel"
+
+rule "Consensus"
+    when
+    	$inputs : Map()
+        $max : String() from $inputs.keySet()
+        not String($inputs.get(this) > $inputs.get($max)) from $inputs.keySet()
+    then
+       	drools.getKnowledgeRuntime().setGlobal("direction", $max)
+end
