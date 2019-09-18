@@ -64,10 +64,8 @@ public class ConsumerRoute extends RouteBuilder {
 			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));    
 		
 		from("kafka:directive-white?synchronous=true")
-		.streamCaching()
-		.unmarshal().json(JsonLibrary.Jackson, Map.class)
-		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
+			.streamCaching()
+			.unmarshal().json(JsonLibrary.Jackson, Map.class)
+			.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
 	}
-	
-	
 }
