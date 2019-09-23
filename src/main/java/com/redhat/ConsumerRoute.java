@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
@@ -57,17 +59,53 @@ public class ConsumerRoute extends RouteBuilder {
 		
 		getContext().addComponent("kafka", kafka);
 		
-		// Consumer for messages which correspond to the "directive" kafka topic
 		from("kafka:directive-red?synchronous=true")
+		.id("red")
 			.streamCaching()
 			.unmarshal().json(JsonLibrary.Jackson, Map.class)
 			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));    
 		
 		from("kafka:directive-white?synchronous=true")
+		.id("white")
 		.streamCaching()
 		.unmarshal().json(JsonLibrary.Jackson, Map.class)
 		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
+		
+		from("kafka:game-over")
+		.process(new Processor() {
+			@Override
+			public void process(Exchange exchange) throws Exception {
+				exchange.getContext().stopRoute("red");
+				exchange.getContext().stopRoute("white");
+				
+				String winner = exchange.getIn().getBody(String.class);
+				String message = winner.equals("red") ? "Team Red Hat Wins!!" : "Team White Hat Wins!!";
+				
+				//Clear the console
+				System.out.print("\033[H\033[2J");  
+			    System.out.flush(); 
+		
+			    //Display winner banner
+				System.out.println(message + "\n\n");
+				
+				//Display Red Team data
+				System.out.println("Team Red Hat Data");
+				System.out.println("MVP: " + findMVP(redUserData));
+				System.out.println("Biggest Troll: " + findTroll(redUserData) + "\n\n");
+				
+				//Display White Team data
+				System.out.println("Team White Hat Data");
+				System.out.println("MVP: " + findMVP(whiteUserData));
+				System.out.println("Biggest Troll: " + findTroll(whiteUserData));
+			}
+		});
 	}
 	
+	private String findMVP(Map<String, Integer> userData) {
+		return userData.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+	}
 	
+	private String findTroll(Map<String, Integer> userData) {
+		return userData.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
+	}
 }
