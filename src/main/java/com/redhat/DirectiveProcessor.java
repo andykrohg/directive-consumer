@@ -1,14 +1,11 @@
 package com.redhat;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.tools.ant.taskdefs.Sleep;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.kie.api.runtime.KieSession;
 

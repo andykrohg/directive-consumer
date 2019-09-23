@@ -99,6 +99,8 @@ public class ConsumerRoute extends RouteBuilder {
 				System.out.println("Biggest Troll: " + findTroll(whiteUserData));
 				
 				manager.close();
+				redKieSession.dispose();
+				whiteKieSession.dispose();
 			}
 		});
 	}
