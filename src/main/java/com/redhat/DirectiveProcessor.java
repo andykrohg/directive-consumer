@@ -50,11 +50,6 @@ public class DirectiveProcessor implements Processor {
 				.collect(Collectors.groupingBy(map -> map.get("direction").toString(), Collectors.counting()));
 		
 		final String consensus = determineConsensus(totals);
-		System.out.println("Consensus:" + consensus);
-		
-		userData.forEach((key, value) -> {
-			System.out.println(key + ": " + value);
-		});
 		
 		String key = "";
 		if (color.equals("white")) {
@@ -87,29 +82,9 @@ public class DirectiveProcessor implements Processor {
 			// push to Data Grid
 			userData.putAsync(input.get("username"), score);
 		});
-		
-//		// Who has agreed with the consensus the most?
-//		String goodGuy = userData.keySet().stream().max(new Comparator<String>() {
-//			@Override
-//			public int compare(String o1, String o2) {
-//				return userData.get(o1).compareTo(userData.get(o2));
-//			}
-//		}).get();
-//
-//		// Who has *disagreed* with the consensus the most?
-//		String badGuy = userData.keySet().stream().min(new Comparator<String>() {
-//			@Override
-//			public int compare(String o1, String o2) {
-//				return userData.get(o1).compareTo(userData.get(o2));
-//			}
-//		}).get();
 
 		// reset the buffer
 		inputs.clear();
-
-//		System.out.println("Good guy: " + goodGuy);
-//		System.err.println("Bad guy: " + badGuy);
-		
 		time = System.currentTimeMillis();
 	}
 
