@@ -97,6 +97,8 @@ public class ConsumerRoute extends RouteBuilder {
 				System.out.println("Team White Hat Data");
 				System.out.println("MVP: " + findMVP(whiteUserData));
 				System.out.println("Biggest Troll: " + findTroll(whiteUserData));
+				
+				manager.close();
 			}
 		});
 	}
