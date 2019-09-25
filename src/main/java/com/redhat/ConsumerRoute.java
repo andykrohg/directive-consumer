@@ -102,7 +102,7 @@ public class ConsumerRoute extends RouteBuilder {
 				redKieSession.dispose();
 				whiteKieSession.dispose();
 			}
-		});
+		}).stop();
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
