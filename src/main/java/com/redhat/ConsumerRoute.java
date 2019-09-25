@@ -106,10 +106,10 @@ public class ConsumerRoute extends RouteBuilder {
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
-		return userData.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+		return userData.isEmpty() ? "No one" : userData.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
 	}
 	
 	private String findTroll(Map<String, Integer> userData) {
-		return userData.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
+		return userData.isEmpty() ? "No one" : userData.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
 	}
 }
