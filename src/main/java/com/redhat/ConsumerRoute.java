@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
@@ -31,6 +32,8 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	protected final KieSession redKieSession = new DroolsBeanFactory().getKieSession();
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
+	
+	protected boolean gameOver = false;
 	
 	@Override
 	public void configure() throws Exception {
@@ -71,10 +74,13 @@ public class ConsumerRoute extends RouteBuilder {
 		.unmarshal().json(JsonLibrary.Jackson, Map.class)
 		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
 		
-		from("kafka:game-over")
+		
+		from("kafka:game-over?synchronous=true")
+		.choice().when(PredicateBuilder.constant(! gameOver))
 		.process(new Processor() {
 			@Override
 			public void process(Exchange exchange) throws Exception {
+				gameOver = true;
 				exchange.getContext().stopRoute("red");
 				exchange.getContext().stopRoute("white");
 				
@@ -105,7 +111,7 @@ public class ConsumerRoute extends RouteBuilder {
 				redKieSession.dispose();
 				whiteKieSession.dispose();
 			}
-		}).stop();
+		}).endChoice();
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
