@@ -79,7 +79,9 @@ public class ConsumerRoute extends RouteBuilder {
 				exchange.getContext().stopRoute("white");
 				
 				String winner = exchange.getIn().getBody(String.class);
-				String message = winner.equals("red") ? "Team Red Hat Wins!!" : "Team White Hat Wins!!";
+				String message = winner.equals("red") ? 
+						DirectiveProcessor.ANSI_RED + "Team Red Hat Wins!!" + DirectiveProcessor.ANSI_RESET : 
+							DirectiveProcessor.ANSI_WHITE + "Team White Hat Wins!!" + DirectiveProcessor.ANSI_RESET;
 				
 				//Clear the console
 				System.out.print("\033[H\033[2J");  
@@ -89,15 +91,16 @@ public class ConsumerRoute extends RouteBuilder {
 				System.out.println(message + "\n\n");
 				
 				//Display Red Team data
-				System.out.println("Team Red Hat Data");
+				System.out.println(DirectiveProcessor.ANSI_RED + "Team Red Hat Data" + DirectiveProcessor.ANSI_RESET);
 				System.out.println("MVP: " + findMVP(redUserData));
 				System.out.println("Biggest Troll: " + findTroll(redUserData) + "\n\n");
 				
 				//Display White Team data
-				System.out.println("Team White Hat Data");
+				System.out.println(DirectiveProcessor.ANSI_WHITE + "Team White Hat Data" + DirectiveProcessor.ANSI_RESET);
 				System.out.println("MVP: " + findMVP(whiteUserData));
 				System.out.println("Biggest Troll: " + findTroll(whiteUserData));
 				
+				manager.stop();
 				manager.close();
 				redKieSession.dispose();
 				whiteKieSession.dispose();
