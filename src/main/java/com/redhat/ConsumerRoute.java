@@ -112,6 +112,11 @@ public class ConsumerRoute extends RouteBuilder {
 				whiteKieSession.dispose();
 			}
 		}).endChoice();
+		
+		//Clear the console
+		System.out.print("\033[H\033[2J");  
+	    System.out.flush(); 
+	    System.out.println("Ready... Go!");
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
