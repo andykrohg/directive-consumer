@@ -30,6 +30,9 @@ public class DirectiveProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
+		if (ConsumerRoute.gameOver) {
+			return;
+		}
 		Map<String, String> body = exchange.getIn().getBody(Map.class);
 		String direction = body.get("direction");
 		String username = body.get("username");

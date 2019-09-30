@@ -33,7 +33,7 @@ public class ConsumerRoute extends RouteBuilder {
 	protected final KieSession redKieSession = new DroolsBeanFactory().getKieSession();
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
-	protected boolean gameOver = false;
+	protected static boolean gameOver = false;
 	
 	@Override
 	public void configure() throws Exception {
@@ -76,13 +76,13 @@ public class ConsumerRoute extends RouteBuilder {
 		
 		
 		from("kafka:game-over?synchronous=true")
-		.choice().when(PredicateBuilder.constant(! gameOver))
 		.process(new Processor() {
 			@Override
 			public void process(Exchange exchange) throws Exception {
+				if (gameOver) {
+					return;
+				}
 				gameOver = true;
-				exchange.getContext().stopRoute("red");
-				exchange.getContext().stopRoute("white");
 				
 				String winner = exchange.getIn().getBody(String.class);
 				String message = winner.equals("red") ? 
@@ -110,8 +110,10 @@ public class ConsumerRoute extends RouteBuilder {
 				manager.close();
 				redKieSession.dispose();
 				whiteKieSession.dispose();
+				exchange.getContext().stopRoute("red");
+				exchange.getContext().stopRoute("white");
 			}
-		}).endChoice();
+		});
 		
 		//Clear the console
 		System.out.print("\033[H\033[2J");  
