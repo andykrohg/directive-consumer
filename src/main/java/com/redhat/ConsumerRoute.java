@@ -7,10 +7,10 @@ import java.util.Properties;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
+import org.apache.camel.component.stream.StreamComponent;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -33,7 +33,7 @@ public class ConsumerRoute extends RouteBuilder {
 	protected final KieSession redKieSession = new DroolsBeanFactory().getKieSession();
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
-	protected static boolean gameOver = false;
+	protected static boolean gameOver = true;
 	
 	@Override
 	public void configure() throws Exception {
@@ -48,9 +48,6 @@ public class ConsumerRoute extends RouteBuilder {
 		RemoteCacheManager manager = new RemoteCacheManager(config);
 		redUserData = manager.administration().getOrCreateCache("red-data", template);
 		whiteUserData = manager.administration().getOrCreateCache("white-data", template);
-		redUserData.clear();
-		whiteUserData.clear();
-		
 		
 		KafkaComponent kafka = new KafkaComponent();		
 		KafkaConfiguration kafkaConfig = new KafkaConfiguration();
@@ -61,6 +58,7 @@ public class ConsumerRoute extends RouteBuilder {
 		kafka.setConfiguration(kafkaConfig);
 		
 		getContext().addComponent("kafka", kafka);
+		getContext().addComponent("stream", new StreamComponent());
 		
 		from("kafka:directive-red?synchronous=true")
 		.id("red")
@@ -106,19 +104,42 @@ public class ConsumerRoute extends RouteBuilder {
 				System.out.println("MVP: " + findMVP(whiteUserData));
 				System.out.println("Biggest Troll: " + findTroll(whiteUserData));
 				
-				manager.stop();
-				manager.close();
-				redKieSession.dispose();
-				whiteKieSession.dispose();
-				exchange.getContext().stopRoute("red");
-				exchange.getContext().stopRoute("white");
+				System.out.println("\n\nPress ENTER to play again, or Ctrl+C to quit");
 			}
 		});
+		
+		from("stream:in")
+			.process(new Processor() {
+				@Override
+				public void process(Exchange exchange) throws Exception {
+					if (! gameOver) {
+						return;
+					}
+					
+					startGame();
+				}
+			});
 		
 		//Clear the console
 		System.out.print("\033[H\033[2J");  
 	    System.out.flush(); 
-	    System.out.println("Ready... Go!");
+	    System.out.println("Press ENTER to start!");
+	}
+	
+	private void startGame() throws Exception {
+		System.out.print("\033[H\033[2J");  
+	    System.out.flush(); 
+	    System.out.println("3...");
+	    Thread.sleep(1000);
+	    System.out.println("2...");
+	    Thread.sleep(1000);
+	    System.out.println("1...");
+	    Thread.sleep(1000);
+		System.out.println("Go!!");
+		
+		redUserData.clear();
+		whiteUserData.clear();
+		gameOver = false;
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
