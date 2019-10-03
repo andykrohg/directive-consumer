@@ -43,6 +43,14 @@ public class ConsumerRoute extends RouteBuilder {
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
 		
+		TrustStore.createFromCrtFile("/tmp/certs/ca.crt",
+			props.getProperty("kafka.ssl.truststore.location"),
+			props.getProperty("kafka.ssl.truststore.password").toCharArray());
+
+		TrustStore.createFromCrtFile("/tmp/certs/tls.crt",
+			props.getProperty("infinispan.client.hotrod.trust_store_file_name"),
+			props.getProperty("infinispan.client.hotrod.trust_store_password").toCharArray());
+		
 		String template = null;
 		Configuration config = new ConfigurationBuilder().withProperties(props).build();
 		RemoteCacheManager manager = new RemoteCacheManager(config);
