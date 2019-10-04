@@ -3,3 +3,5 @@
 .settings/
 .project
 consumer.jar
+datagrid.jks
+keystore.jks
