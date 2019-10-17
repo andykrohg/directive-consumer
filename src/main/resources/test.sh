@@ -1,67 +1,32 @@
 #!/bin/bash
 
-user=$1
-team=$2
+if [ "$1" == "red" ] || [ "$1" == "white" ]; then
+    team=$1
+    user=$2
+fi
+if [ "$2" == "red" ] || [ "$2" == "white" ]; then
+    team=$2
+    user=$1
+fi
 
-# Up 2 times
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"up\"}" -H "Content-Type: application/json" > /dev/null
-echo "UP"
-sleep 1
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"up\"}" -H "Content-Type: application/json" > /dev/null
-echo "UP"
+if [ -z "$user" ]; then
+    read -p "username? " user
+fi
+if [ -z "$team" ]; then
+    read -p "team? " team
+fi
 
-# Wait for zombie to pass
-sleep 3
+count=1
+RANGE=4
+directionArray=("up" "down" "left" "right")
 
-# Right 3 times
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"right\"}" -H "Content-Type: application/json" > /dev/null
-echo "RIGHT"
-sleep 1
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"right\"}" -H "Content-Type: application/json" > /dev/null
-echo "RIGHT"
-sleep 1
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"right\"}" -H "Content-Type: application/json" > /dev/null
-echo "RIGHT"
-sleep 1
-
-# Down 1 time
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"down\"}" -H "Content-Type: application/json" > /dev/null
-echo "DOWN"
-sleep 1
-
-# Right 1 time
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"right\"}" -H "Content-Type: application/json" > /dev/null
-echo "RIGHT"
-
-# Wait for zombie to pass
-sleep 1
-
-# Left 1 time
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"left\"}" -H "Content-Type: application/json" > /dev/null
-echo "LEFT"
-sleep 1
-
-# Up 1 time
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"up\"}" -H "Content-Type: application/json" > /dev/null
-echo "UP"
-sleep 1
-
-# Left 1 time
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"left\"}" -H "Content-Type: application/json" > /dev/null
-echo "LEFT"
-sleep 1
-
-# Up 2 times
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"up\"}" -H "Content-Type: application/json" > /dev/null
-echo "UP"
-sleep 1
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"up\"}" -H "Content-Type: application/json" > /dev/null
-echo "UP"
-sleep 1
-
-# Right 2 times
-curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"right\"}" -H "Content-Type: application/json" > /dev/null
-echo "RIGHT"
-sleep 1
+while true; do
+    number=$RANDOM
+    let "number %= $RANGE"
+    
+    echo ${directionArray[$number]}
+    curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"${directionArray[$number]}\"}" -H "Content-Type: application/json" > /dev/null
+    sleep 1
+done
 
 echo "DONE!"
