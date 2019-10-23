@@ -26,7 +26,7 @@ while true; do
     
     echo ${directionArray[$number]}
     curl -sX POST "https://directive-producer-demojam-zombie.apps.akrohg-openshift.redhatgov.io/camel/rest/produce/${team}" --data "{\"username\":\"${user}\",\"direction\":\"${directionArray[$number]}\"}" -H "Content-Type: application/json" > /dev/null
-    sleep 1
+    sleep .2
 done
 
 echo "DONE!"
