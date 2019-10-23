@@ -8,6 +8,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.kie.api.runtime.KieSession;
+import org.openqa.selenium.Keys;
 
 public class DirectiveProcessor implements Processor {
 	public static long time = System.currentTimeMillis();
@@ -51,7 +52,7 @@ public class DirectiveProcessor implements Processor {
 		
 		final String consensus = determineConsensus(totals);
 		
-		String key = "";
+		CharSequence key = "";
 		if (color.equals("white")) {
 			switch (consensus) {
 			case "left":
@@ -68,11 +69,24 @@ public class DirectiveProcessor implements Processor {
 				break;
 			}
 		} else {
-			key = "arrow-" + consensus;
+			switch (consensus) {
+			case "left":
+				key = Keys.LEFT;
+				break;
+			case "right":
+				key = Keys.RIGHT;
+				break;
+			case "up":
+				key = Keys.UP;
+				break;
+			case "down":
+				key = Keys.DOWN;
+				break;
+			}
 		}
 
-		Runtime.getRuntime().exec("src/main/resources/cliclick kd:" + key + " w:675 ku:" + key);
-		
+		ConsumerRoute.bodyElement.sendKeys(new String(new char[300]).replace("\0", key));
+				
 		// +1 for consent, -1 for dissent
 		inputs.parallelStream().forEach(input -> {
 			int scoreChange = input.get("direction").equals(consensus) ? 1 : -1;

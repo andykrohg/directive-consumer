@@ -18,6 +18,10 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.kie.api.runtime.KieSession;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
 import com.redhat.dm.DroolsBeanFactory;
@@ -34,9 +38,14 @@ public class ConsumerRoute extends RouteBuilder {
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
 	protected static boolean gameOver = true;
+	protected static WebDriver driver = new ChromeDriver();
+	protected static WebElement bodyElement;
 	
 	@Override
 	public void configure() throws Exception {
+		driver.get("http://demojam-zombie-demojam.apps.akrohg-openshift.redhatgov.io");
+		bodyElement = driver.findElement(By.xpath("/html/body"));
+		
 		restConfiguration().component("servlet").bindingMode(RestBindingMode.json);
 		
 		Properties props = new Properties();
