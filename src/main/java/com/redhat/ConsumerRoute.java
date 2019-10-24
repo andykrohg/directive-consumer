@@ -1,5 +1,6 @@
 package com.redhat;
 
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -51,11 +52,11 @@ public class ConsumerRoute extends RouteBuilder {
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
 		
-		TrustStore.createFromCrtFile("/tmp/certs/ca.crt",
+		TrustStore.createFromCrtFile("ca.crt",
 			props.getProperty("kafka.ssl.truststore.location"),
 			props.getProperty("kafka.ssl.truststore.password").toCharArray());
 
-		TrustStore.createFromCrtFile("/tmp/certs/tls.crt",
+		TrustStore.createFromCrtFile("tls.crt",
 			props.getProperty("infinispan.client.hotrod.trust_store_file_name"),
 			props.getProperty("infinispan.client.hotrod.trust_store_password").toCharArray());
 		
