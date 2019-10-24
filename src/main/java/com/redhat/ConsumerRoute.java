@@ -1,9 +1,8 @@
 package com.redhat;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -28,8 +27,8 @@ import com.redhat.dm.DroolsBeanFactory;
 
 @Component
 public class ConsumerRoute extends RouteBuilder {
-	protected List<Map<String, String>> redInputs = new ArrayList<Map<String, String>>();
-	protected List<Map<String, String>> whiteInputs = new ArrayList<Map<String, String>>();
+	protected ArrayBlockingQueue<Map<String, String>> redInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
+	protected ArrayBlockingQueue<Map<String, String>> whiteInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
 	
 	protected RemoteCache<String, Integer> redUserData;
 	protected RemoteCache<String, Integer> whiteUserData;
@@ -77,18 +76,24 @@ public class ConsumerRoute extends RouteBuilder {
 		getContext().addComponent("kafka", kafka);
 		getContext().addComponent("stream", new StreamComponent());
 		
-		from("kafka:directive-red?synchronous=true")
+		from("kafka:directive-red")
 		.id("red")
 			.streamCaching()
-			.unmarshal().json(JsonLibrary.Jackson, Map.class)
-			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));    
+			.unmarshal().json(JsonLibrary.Jackson, Map.class).process(new InputProcessor(redInputs, "red"));
+			    
 		
-		from("kafka:directive-white?synchronous=true")
+		from("kafka:directive-white")
 		.id("white")
 		.streamCaching()
 		.unmarshal().json(JsonLibrary.Jackson, Map.class)
-		.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
+		.process(new InputProcessor(whiteInputs, "white"));
 		
+		
+		from("timer://move?fixedRate=true&period=500")
+			.multicast().to("direct:red-processor", "direct:white-processor");
+		
+		from("direct:red-processor").process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));
+		from("direct:white-processor").process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
 		
 		from("kafka:game-over?synchronous=true")
 		.process(new Processor() {
