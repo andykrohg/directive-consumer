@@ -85,7 +85,7 @@ public class DirectiveProcessor implements Processor {
 			}
 		}
 
-		ConsumerRoute.bodyElement.sendKeys(new String(new char[300]).replace("\0", key));
+		ConsumerRoute.bodyElement.sendKeys(new String(new char[650]).replace("\0", key));
 				
 		// +1 for consent, -1 for dissent
 		inputs.parallelStream().forEach(input -> {
