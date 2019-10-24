@@ -1,5 +1,6 @@
 package com.redhat;
 
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -42,20 +43,21 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-		driver.get("http://demojam-zombie-demojam.apps.akrohg-openshift.redhatgov.io");
-		bodyElement = driver.findElement(By.xpath("/html/body"));
-		
 		restConfiguration().component("servlet").bindingMode(RestBindingMode.json);
 		
 		Properties props = new Properties();
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
+		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("game.properties"));
 		
-		TrustStore.createFromCrtFile("/tmp/certs/ca.crt",
+		driver.get(props.getProperty("game.url"));
+		bodyElement = driver.findElement(By.xpath("/html/body"));
+		
+		TrustStore.createFromCrtFile("ca.crt",
 			props.getProperty("kafka.ssl.truststore.location"),
 			props.getProperty("kafka.ssl.truststore.password").toCharArray());
 
-		TrustStore.createFromCrtFile("/tmp/certs/tls.crt",
+		TrustStore.createFromCrtFile("tls.crt",
 			props.getProperty("infinispan.client.hotrod.trust_store_file_name"),
 			props.getProperty("infinispan.client.hotrod.trust_store_password").toCharArray());
 		
