@@ -1,5 +1,10 @@
 package com.redhat;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
@@ -13,6 +18,7 @@ import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.camel.component.stream.StreamComponent;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.commons.io.IOUtils;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
@@ -38,7 +44,7 @@ public class ConsumerRoute extends RouteBuilder {
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
 	protected static boolean gameOver = true;
-	protected static WebDriver driver = new ChromeDriver();
+	protected static WebDriver driver;
 	protected static WebElement bodyElement;
 	
 	@Override
@@ -50,6 +56,8 @@ public class ConsumerRoute extends RouteBuilder {
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("game.properties"));
 		
+		copyChromeDriver();
+		driver = new ChromeDriver();
 		driver.get(props.getProperty("game.url"));
 		bodyElement = driver.findElement(By.xpath("/html/body"));
 		
@@ -172,5 +180,15 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	private String findTroll(Map<String, Integer> userData) {
 		return userData.isEmpty() ? "No one" : userData.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
+	}
+	
+	private void copyChromeDriver() throws FileNotFoundException, IOException {
+		String os = System.getProperty("os.name").toLowerCase();
+		os = os.contains("mac") ? "osx" : os.contains("nux") ? "linux" : "undefined";
+		if ( ! Files.exists(Paths.get("chromedriver"))) {
+			IOUtils.copy(this.getClass().getClassLoader().getResourceAsStream("chromedriver-" + os), new FileOutputStream("chromedriver"));
+		}
+		new File("chromedriver").setExecutable(true);
+		System.setProperty("webdriver.chrome.driver", "chromedriver");
 	}
 }
