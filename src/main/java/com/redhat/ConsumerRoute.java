@@ -135,6 +135,9 @@ public class ConsumerRoute extends RouteBuilder {
 					System.out.println("Biggest Troll: " + findTroll(whiteUserData));
 				}
 			});
+		
+		rest("/join-link")
+			.get().route().setBody(constant(System.getenv("JOIN_LINK")));
 	}
 	
 	private void startGame() throws Exception {

@@ -50,7 +50,7 @@
                 }
             }, 500);
 
-            $.get("config/link.txt", function(data) {
+            $.get("/camel/join-link", function(data) {
                 $("#join-link").html(data);
                 $("#join-link").attr("href", data);
             });
