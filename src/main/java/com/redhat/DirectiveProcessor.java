@@ -2,7 +2,6 @@ package com.redhat;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 

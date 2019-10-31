@@ -21,6 +21,7 @@ public class InputProcessor implements Processor {
 		this.color = color;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		if (ConsumerRoute.gameOver) {

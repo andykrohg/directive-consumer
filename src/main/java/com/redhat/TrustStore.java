@@ -16,11 +16,6 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
-
-import com.thoughtworks.xstream.io.path.Path;
-
 public class TrustStore {
 
    /**
@@ -48,10 +43,7 @@ public class TrustStore {
     * @param password the password for accessing the generated truststore
     */
    public static void create(List<String> certs, String path, char[] password) throws GeneralSecurityException, IOException {
-	   if ( ! Files.exists(Paths.get(path).getParent())) {
-      	 Files.createDirectories(Paths.get(path).getParent());
-       }
-	   try (FileOutputStream output = new FileOutputStream(path)) {
+      try (FileOutputStream output = new FileOutputStream(path)) {
          KeyStore trustStore = KeyStore.getInstance("PKCS12");
          CertificateFactory cf = CertificateFactory.getInstance("X.509");
          trustStore.load(null, null);
@@ -77,7 +69,7 @@ public class TrustStore {
    private static List<String> parseCrtFile(String path) throws IOException {
       List<String> certs = new ArrayList<>();
       StringBuilder sb = new StringBuilder();
-      for (String line : IOUtils.readLines(TrustStore.class.getClassLoader().getResourceAsStream(path), StandardCharsets.UTF_8)) {
+      for (String line : Files.readAllLines(Paths.get(path))) {
          if (line.isEmpty() || line.contains("BEGIN CERTIFICATE"))
             continue;
 
