@@ -20,7 +20,7 @@
             $("#start-screen").hide();
             $(".webgl-content").show();
 
-            setTimeout(function() {gameOver = false;}, 2000);
+            gameOver = false;
             $.get("/camel/start").done(function() {
                 console.log("Game started.");
             });
