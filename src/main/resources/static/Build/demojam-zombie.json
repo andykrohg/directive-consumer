@@ -1,0 +1,16 @@
+{
+"companyName": "RedHat ",
+"productName": "Demo Jam",
+"productVersion": "0.1",
+"dataUrl": "demojam-zombie.data.unityweb",
+"wasmCodeUrl": "demojam-zombie.wasm.code.unityweb",
+"wasmFrameworkUrl": "demojam-zombie.wasm.framework.unityweb",
+"graphicsAPI": ["WebGL 2.0","WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
+"splashScreenStyle": "Dark",
+"backgroundColor": "#231F20",
+"cacheControl": {"default": "must-revalidate"},
+"developmentBuild": false,
+"multithreading": false,
+"unityVersion": "2019.2.6f1"
+}
