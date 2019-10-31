@@ -32,8 +32,7 @@ public class DirectiveProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		if (ConsumerRoute.gameOver || inputs.isEmpty()) {
-			String direction = new String[]{"up", "down", "left", "right"}[new Random().nextInt(4)];
-			exchange.getIn().setBody(direction);
+			exchange.getIn().setBody("");
 			return;
 		}
 
