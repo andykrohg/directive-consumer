@@ -24,10 +24,6 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.kie.api.runtime.KieSession;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
 import com.redhat.dm.DroolsBeanFactory;
@@ -44,8 +40,6 @@ public class ConsumerRoute extends RouteBuilder {
 	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
 	
 	protected static boolean gameOver = true;
-	protected static WebDriver driver;
-	protected static WebElement bodyElement;
 	
 	@Override
 	public void configure() throws Exception {
@@ -55,11 +49,6 @@ public class ConsumerRoute extends RouteBuilder {
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("game.properties"));
-		
-		copyChromeDriver();
-		driver = new ChromeDriver();
-		driver.get(props.getProperty("game.url"));
-		bodyElement = driver.findElement(By.xpath("/html/body"));
 		
 		TrustStore.createFromCrtFile("ca.crt",
 			props.getProperty("kafka.ssl.truststore.location"),
@@ -98,9 +87,8 @@ public class ConsumerRoute extends RouteBuilder {
 		.unmarshal().json(JsonLibrary.Jackson, Map.class)
 		.process(new InputProcessor(whiteInputs, "white"));
 		
-		
-		from("timer://move?fixedRate=true&period=500")
-			.multicast().to("direct:red-processor", "direct:white-processor");
+		rest("/move")
+		.get("/{color}").route().streamCaching().recipientList(simple("direct:${header.color}-processor"));
 		
 		from("direct:red-processor").process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));
 		from("direct:white-processor").process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));

@@ -2,6 +2,7 @@ package com.redhat;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.kie.api.runtime.KieSession;
-import org.openqa.selenium.Keys;
 
 public class DirectiveProcessor implements Processor {
 	public static final String ANSI_RED = "\u001B[31m";
@@ -32,6 +32,8 @@ public class DirectiveProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		if (ConsumerRoute.gameOver || inputs.isEmpty()) {
+			String direction = new String[]{"up", "down", "left", "right"}[new Random().nextInt(4)];
+			exchange.getIn().setBody(direction);
 			return;
 		}
 
@@ -42,41 +44,6 @@ public class DirectiveProcessor implements Processor {
 				.collect(Collectors.groupingBy(map -> map.get("direction").toString(), Collectors.counting()));
 		
 		final String consensus = determineConsensus(totals);
-		
-		CharSequence key = "";
-		if (color.equals("white")) {
-			switch (consensus) {
-			case "left":
-				key = "a";
-				break;
-			case "right":
-				key = "d";
-				break;
-			case "up":
-				key = "w";
-				break;
-			case "down":
-				key = "s";
-				break;
-			}
-		} else {
-			switch (consensus) {
-			case "left":
-				key = Keys.LEFT;
-				break;
-			case "right":
-				key = Keys.RIGHT;
-				break;
-			case "up":
-				key = Keys.UP;
-				break;
-			case "down":
-				key = Keys.DOWN;
-				break;
-			}
-		}
-
-		ConsumerRoute.bodyElement.sendKeys(new String(new char[500]).replace("\0", key));
 				
 		// +1 for consent, -1 for dissent
 		buffer.parallelStream().forEach(input -> {
@@ -87,6 +54,8 @@ public class DirectiveProcessor implements Processor {
 			// push to Data Grid
 			userData.putAsync(input.get("username"), score);
 		});
+		
+		exchange.getIn().setBody(consensus);
 	}
 
 	public String determineConsensus(Map<String, Long> totals) {
