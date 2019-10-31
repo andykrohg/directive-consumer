@@ -13,21 +13,21 @@
     <script>
     var unityInstance = UnityLoader.instantiate("unityContainer", "Build/demojam-zombie.json", {onProgress: UnityProgress});
     
-    	$(document).ready(function(){
-    		setInterval(function(){
-        		$.get("/camel/move/red", function(data) {
-            		if (["up", "down", "left", "right"].indexOf(data) >= 0) {
-            			unityInstance.SendMessage("Player1", "JavaScriptMove", data);
-            		}
-            	});
+        $(document).ready(function(){
+            setInterval(function(){
+                $.get("/camel/move/red", function(data) {
+                    if (["up", "down", "left", "right"].indexOf(data) >= 0) {
+                        unityInstance.SendMessage("Player1", "JavaScriptMove", data);
+                    }
+                });
 
-            	$.get("/camel/move/white", function(data) {
-            		if (["up", "down", "left", "right"].indexOf(data) >= 0) {
-            			unityInstance.SendMessage("Player2", "JavaScriptMove", data);
-            		}
+                $.get("/camel/move/white", function(data) {
+                    if (["up", "down", "left", "right"].indexOf(data) >= 0) {
+                        unityInstance.SendMessage("Player2", "JavaScriptMove", data);
+                    }
                 });   
-			}, 500);
-    	});
+            }, 500);
+        });
     </script>
   </head>
   <body>
