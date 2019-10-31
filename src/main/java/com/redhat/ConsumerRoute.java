@@ -42,7 +42,7 @@ public class ConsumerRoute extends RouteBuilder {
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
 		
 		//configure Kafka
-		TrustStore.createFromCrtFile("/tmp/certs/ca.crt",
+		TrustStore.createFromCrtFile("/tmp/certs/kafka/ca.crt",
 				props.getProperty("kafka.ssl.truststore.location"),
 				props.getProperty("kafka.ssl.truststore.password").toCharArray());
 		
@@ -60,7 +60,7 @@ public class ConsumerRoute extends RouteBuilder {
 		props.put("infinispan.client.hotrod.server_list", System.getenv("DATAGRID_HOST") + ":443");
 		props.put("infinispan.client.hotrod.sni_host_name", System.getenv("DATAGRID_HOST"));
 
-		TrustStore.createFromCrtFile("/tmp/certs/tls.crt",
+		TrustStore.createFromCrtFile("/tmp/certs/datagrid/tls.crt",
 			props.getProperty("infinispan.client.hotrod.trust_store_file_name"),
 			props.getProperty("infinispan.client.hotrod.trust_store_password").toCharArray());
 		
