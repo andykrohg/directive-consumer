@@ -49,6 +49,11 @@
                     });   
                 }
             }, 500);
+
+            $.get("config/link.txt", function(data) {
+                $("#join-link").html(data);
+                $("#join-link").attr("href", data);
+            };
         });
     </script>
   </head>
