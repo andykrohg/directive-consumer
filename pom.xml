@@ -15,6 +15,7 @@
 		<fuse.version>7.3.0.fuse-730058-redhat-00001</fuse.version>
 		<spring-boot.version>1.5.4.RELEASE</spring-boot.version>
 		<version.org.infinispan>9.4.6.Final-redhat-00002</version.org.infinispan>
+		<vertx.version>3.8.2</vertx.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -35,6 +36,17 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+	
 		<!-- Decision Manager -->
 		<dependency>
 			<groupId>org.kie</groupId>

@@ -33,7 +33,8 @@ public class InputProcessor implements Processor {
 
 		String colorTag = color.equals("red") ? ANSI_RED + "[Team Red Hat] " + ANSI_RESET : ANSI_WHITE + "[Team White Hat] " + ANSI_RESET;
 		System.out.println(colorTag + username + ": " + direction);
-
+		StaticServer.eb.publish("log.output", colorTag + username + ": " + direction);
+		
 		inputs.add(body);
 	}
 }

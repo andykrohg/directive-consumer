@@ -15,9 +15,14 @@
  */
 package com.redhat;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
+
+import io.vertx.core.Vertx;
 
 /**
  * A spring-boot application that includes a Camel route builder to setup the Camel routes
@@ -25,9 +30,17 @@ import org.springframework.context.annotation.ImportResource;
 @SpringBootApplication
 @ImportResource({"classpath:spring/camel-context.xml"})
 public class Application {
-
+	
+	@Autowired
+	private StaticServer staticServer;
+	
     // must have a main method spring-boot can run
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
+    
+    @PostConstruct
+	public void deployVerticle() {
+		Vertx.vertx().deployVerticle(staticServer);
+	}
 }
