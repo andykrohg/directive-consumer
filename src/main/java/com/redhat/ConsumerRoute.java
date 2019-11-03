@@ -16,11 +16,9 @@ import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.kie.api.runtime.KieSession;
-import org.springframework.stereotype.Component;
 
 import com.redhat.dm.DroolsBeanFactory;
 
-@Component
 public class ConsumerRoute extends RouteBuilder {
 	protected ArrayBlockingQueue<Map<String, String>> redInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
 	protected ArrayBlockingQueue<Map<String, String>> whiteInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
@@ -35,7 +33,8 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-		restConfiguration().component("servlet").bindingMode(RestBindingMode.json);
+		System.out.println("Hi");
+		restConfiguration().component("servlet").port(8080).bindingMode(RestBindingMode.json);
 		
 		Properties props = new Properties();
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
