@@ -49,6 +49,17 @@ public class DirectiveProcessor implements Processor {
 			userData.putAsync(input.get("username"), score);
 		});
 		
+		String moves = "";
+		for (Map<String, String> move : buffer) {
+			String direction = move.get("direction");
+			String username = move.get("username");
+
+			String colorTag = color.equals("red") ? ConsumerRoute.colorize("[Team Red Hat] ", "red") : ConsumerRoute.colorize("[Team White Hat] ", "white");
+			moves += colorTag + username + ": " + direction + "<br/>";
+		}
+		//trim the last break
+		moves = moves.substring(0, moves.length() - 5);
+		Server.log(moves);
 		Server.eb.publish(color + ".move", consensus);
 	}
 
