@@ -7,11 +7,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
 public class InputProcessor implements Processor {
-	public static long time = System.currentTimeMillis();
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_WHITE = "\u001B[37m";
-	public static final String ANSI_RESET = "\u001B[0m";
-
 	ArrayBlockingQueue<Map<String, String>> inputs;
 	String color;
 
@@ -31,9 +26,9 @@ public class InputProcessor implements Processor {
 		String direction = body.get("direction");
 		String username = body.get("username");
 
-		String colorTag = color.equals("red") ? ANSI_RED + "[Team Red Hat] " + ANSI_RESET : ANSI_WHITE + "[Team White Hat] " + ANSI_RESET;
-		System.out.println(colorTag + username + ": " + direction);
-
+		String colorTag = color.equals("red") ? ConsumerRoute.colorize("[Team Red Hat] ", "red") : ConsumerRoute.colorize("[Team White Hat] ", "white");
+		Server.log(colorTag + username + ": " + direction);
+		
 		inputs.add(body);
 	}
 }

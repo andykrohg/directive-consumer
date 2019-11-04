@@ -11,10 +11,6 @@ import org.infinispan.client.hotrod.RemoteCache;
 import org.kie.api.runtime.KieSession;
 
 public class DirectiveProcessor implements Processor {
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_WHITE = "\u001B[37m";
-	public static final String ANSI_RESET = "\u001B[0m";
-
 	RemoteCache<String, Integer> userData;
 	ArrayBlockingQueue<Map<String, String>> inputs;
 	String color;
@@ -53,7 +49,7 @@ public class DirectiveProcessor implements Processor {
 			userData.putAsync(input.get("username"), score);
 		});
 		
-		exchange.getIn().setBody(consensus);
+		Server.eb.publish(color + ".move", consensus);
 	}
 
 	public String determineConsensus(Map<String, Long> totals) {

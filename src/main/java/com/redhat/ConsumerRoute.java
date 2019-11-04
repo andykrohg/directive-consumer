@@ -4,23 +4,18 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.Configuration;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.kie.api.runtime.KieSession;
-import org.springframework.stereotype.Component;
 
 import com.redhat.dm.DroolsBeanFactory;
 
-@Component
 public class ConsumerRoute extends RouteBuilder {
 	protected ArrayBlockingQueue<Map<String, String>> redInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
 	protected ArrayBlockingQueue<Map<String, String>> whiteInputs = new ArrayBlockingQueue<Map<String, String>>(1000);
@@ -28,14 +23,15 @@ public class ConsumerRoute extends RouteBuilder {
 	protected RemoteCache<String, Integer> redUserData;
 	protected RemoteCache<String, Integer> whiteUserData;
 	
-	protected final KieSession redKieSession = new DroolsBeanFactory().getKieSession();
-	protected final KieSession whiteKieSession = new DroolsBeanFactory().getKieSession();
+	protected KieSession redKieSession;
+	protected KieSession whiteKieSession;
 	
 	protected static boolean gameOver = true;
 	
 	@Override
 	public void configure() throws Exception {
-		restConfiguration().component("servlet").bindingMode(RestBindingMode.json);
+		redKieSession = new DroolsBeanFactory().getKieSession();
+		whiteKieSession = new DroolsBeanFactory().getKieSession();
 		
 		Properties props = new Properties();
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
@@ -82,78 +78,49 @@ public class ConsumerRoute extends RouteBuilder {
 			.streamCaching()
 			.unmarshal().json(JsonLibrary.Jackson, Map.class)
 			.process(new InputProcessor(whiteInputs, "white"));
-	
-		rest("/move")
-			.get("/{color}").route()
-			.streamCaching()
-			.recipientList(simple("direct:${header.color}-processor"));
 		
+		from("timer://move?fixedRate=true&period=500")
+			.multicast().to("direct:red-processor", "direct:white-processor");
 		
 		from("direct:red-processor")
 			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));
 		from("direct:white-processor")
 			.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
-		
-		rest("/start")
-			.get().route().process(new Processor() {
-				@Override
-				public void process(Exchange exchange) throws Exception {
-					startGame();
-				}
-			});
-		
-		rest("/rest")
-			.get("/gameOver/{color}").route()
-			.process(new Processor() {
-				@Override
-				public void process(Exchange exchange) throws Exception {
-					if (gameOver) {
-						return;
-					}
-					gameOver = true;
-					
-					String winner = exchange.getIn().getHeader("color", String.class);
-					String message = winner.equals("red") ? 
-							DirectiveProcessor.ANSI_RED + "TEAM RED HAT WINS!!!" + DirectiveProcessor.ANSI_RESET:
-								DirectiveProcessor.ANSI_WHITE + "TEAM WHITE HAT WINS!!!" + DirectiveProcessor.ANSI_RESET;
-					
-					//Clear the console
-					System.out.print("\033[H\033[2J");  
-				    System.out.flush(); 
-			
-				    //Display winner banner
-					System.out.println(message + "\n\n");
-					
-					//Display Red Team data
-					System.out.println(DirectiveProcessor.ANSI_RED + "Team Red Hat Data" + DirectiveProcessor.ANSI_RESET);
-					System.out.println("MVP: " + findMVP(redUserData));
-					System.out.println("Biggest Troll: " + findTroll(redUserData) + "\n\n");
-					
-					//Display White Team data
-					System.out.println(DirectiveProcessor.ANSI_WHITE + "Team White Hat Data" + DirectiveProcessor.ANSI_RESET);
-					System.out.println("MVP: " + findMVP(whiteUserData));
-					System.out.println("Biggest Troll: " + findTroll(whiteUserData));
-				}
-			});
-		
-		rest("/join-link")
-			.get().route().setBody(constant(System.getenv("JOIN_LINK")));
 	}
 	
-	private void startGame() throws Exception {
-		System.out.print("\033[H\033[2J");  
-	    System.out.flush(); 
-	    System.out.println("3...");
-	    Thread.sleep(1000);
-	    System.out.println("2...");
-	    Thread.sleep(1000);
-	    System.out.println("1...");
-	    Thread.sleep(1000);
-		System.out.println("Go!!");
-		
+	public void startGame() throws Exception {
 		redUserData.clear();
 		whiteUserData.clear();
 		gameOver = false;
+	}
+	
+	public void gameOver(String winningColor) {
+		if (gameOver) {
+			return;
+		}
+		gameOver = true;
+
+		String message = winningColor.equals("red") ? 
+				colorize("TEAM RED HAT WINS!!!", "red") :
+					colorize("TEAM WHITE HAT WINS!!!", "white") ;
+
+	    //Display winner banner
+		message += "<br/><br/>";
+		
+		//Display Red Team data
+		message += colorize("Team Red Hat Data<br/>", "red");
+		message += "MVP: " + findMVP(redUserData) +" <br/>";
+		message += "Biggest Troll: " + findTroll(redUserData) + "<br/><br/>";
+		
+		//Display White Team data
+		message += colorize("Team White Hat Data<br/>", "white");
+		message += "MVP: " + findMVP(whiteUserData) + "<br/>";
+		message += "Biggest Troll: " + findTroll(whiteUserData) + "<br/><br/>";
+		
+		message += "Press ESC to play again!";
+		
+		Server.eb.publish("game.over", message);
+		System.out.println(message);
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {
@@ -162,5 +129,9 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	private String findTroll(Map<String, Integer> userData) {
 		return userData.isEmpty() ? "No one" : userData.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
+	}
+	
+	public static String colorize(String content, String color) {
+		return "<span class='font-" + color + "'>" + content + "</span>";
 	}
 }

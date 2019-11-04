@@ -1,12 +1,18 @@
 package com.redhat.dm;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.appformer.maven.support.AFReleaseId;
+import org.appformer.maven.support.DependencyFilter;
+import org.appformer.maven.support.PomModel;
+import org.drools.compiler.kie.builder.impl.KieBuilderImpl;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.KieModule;
 import org.kie.api.builder.KieRepository;
 import org.kie.api.builder.ReleaseId;
-import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
@@ -32,6 +38,28 @@ public class DroolsBeanFactory {
         
         
         KieBuilder kb = kieServices.newKieBuilder(kieFileSystem);
+        ((KieBuilderImpl) kb).setPomModel(new PomModel() {
+
+			@Override
+			public Collection<AFReleaseId> getDependencies() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public Collection<AFReleaseId> getDependencies(DependencyFilter filter) {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public AFReleaseId getParentReleaseId() {
+				return kieServices.getRepository().getDefaultReleaseId();
+			}
+
+			@Override
+			public AFReleaseId getReleaseId() {
+				// TODO Auto-generated method stub
+				return kieServices.getRepository().getDefaultReleaseId();
+			}});
         kb.buildAll();
         KieModule kieModule = kb.getKieModule();
 
@@ -39,23 +67,5 @@ public class DroolsBeanFactory {
 
         return kContainer.newKieSession();
 
-    }
-
-    public KieSession getKieSession(Resource dt) {
-        KieFileSystem kieFileSystem = kieServices.newKieFileSystem()
-            .write(dt);
-
-        kieServices.newKieBuilder(kieFileSystem)
-            .buildAll();
-
-        KieRepository kieRepository = kieServices.getRepository();
-
-        ReleaseId krDefaultReleaseId = kieRepository.getDefaultReleaseId();
-
-        KieContainer kieContainer = kieServices.newKieContainer(krDefaultReleaseId);
-
-        KieSession ksession = kieContainer.newKieSession();
-
-        return ksession;
     }
 }
