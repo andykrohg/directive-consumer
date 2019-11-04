@@ -12,7 +12,7 @@
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-		<fuse.version>7.4.0.fuse-sb2-740019-redhat-00005</fuse.version>
+		<fuse.version>7.4.0.fuse-740036-redhat-00002</fuse.version>
 		<spring-boot.version>1.5.4.RELEASE</spring-boot.version>
 		<version.org.infinispan>9.4.6.Final-redhat-00002</version.org.infinispan>
 		<vertx.version>3.8.2</vertx.version>
@@ -22,7 +22,7 @@
 			<dependency>
 				<groupId>org.jboss.redhat-fuse</groupId>
 				<artifactId>fuse-eap-bom</artifactId>
-				<version>7.4.0.fuse-740036-redhat-00002</version>
+				<version>${fuse.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -31,7 +31,7 @@
 				<artifactId>infinispan-bom</artifactId>
 				<version>${version.org.infinispan}</version>
 				<type>pom</type>
-				<scope>compile</scope>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
