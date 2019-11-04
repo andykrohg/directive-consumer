@@ -26,9 +26,8 @@ public class InputProcessor implements Processor {
 		String direction = body.get("direction");
 		String username = body.get("username");
 
-		String colorTag = color.equals("red") ? "[Team Red Hat] " : "[Team White Hat] ";
-		System.out.println(colorTag + username + ": " + direction);
-		Server.eb.publish("log.output", colorTag + username + ": " + direction);
+		String colorTag = color.equals("red") ? ConsumerRoute.colorize("[Team Red Hat] ", "red") : ConsumerRoute.colorize("[Team White Hat] ", "white");
+		Server.log(colorTag + username + ": " + direction);
 		
 		inputs.add(body);
 	}

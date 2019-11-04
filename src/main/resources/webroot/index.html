@@ -41,12 +41,18 @@
 	      eb.registerHandler("white.move", function (err, msg) {
             unityInstance.SendMessage("Player2", "JavaScriptMove", msg.body);
           });
+
+	      eb.registerHandler("game.over", function (err, msg) {
+	    	  $('#log').html(msg.body);
+          });
 	    };
         
         function startGame() {
             $("#start-screen").hide();
             $("#game").show();
 
+            $("#log").html("Help your team's Shadowman reach the goal first!<br/>");
+            
             gameOver = false;
             $.get("/start").done(function() {
                 console.log("Game started.");
@@ -70,7 +76,7 @@
 </head>
 <body>
 	<div style="font-family: 'Overpass', sans-serif; text-align: center">
-		<h1>
+		<h1 style="margin:50px">
 			Join Now! <a id="join-link" href="#"></a>
 		</h1>
 	</div>
@@ -99,7 +105,9 @@
 					<div class="title">Demo Jam</div>
 				</div>
 			</div>
-			<div id="log" class="col-4"></div>
+			<div class = "col-4">
+			    <div id="log"></div>
+			</div>
 		</div>
 	</div>
 </body>

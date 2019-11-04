@@ -19,10 +19,18 @@
 #log {
 	overflow:scroll;
 	height:545px;
-	color: white;
+	color: #cccccc;
 	font-size: 24px;
 	border-radius: 5px;
 	padding: 20px;
 	font-family: 'Ubuntu Mono', monospace;
 	background: rgb(35, 31, 32)
+}
+
+.font-red {
+	color: red
+}
+
+.font-white {
+	color: white
 }

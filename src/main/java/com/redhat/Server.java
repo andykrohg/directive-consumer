@@ -3,16 +3,13 @@ package com.redhat;
 import org.apache.camel.CamelContext;
 import org.apache.camel.impl.DefaultCamelContext;
 
-import com.sun.org.apache.xpath.internal.Arg;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
-import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
 
@@ -40,7 +37,8 @@ public class Server extends AbstractVerticle {
 		BridgeOptions opts = new BridgeOptions()
 				.addOutboundPermitted(new PermittedOptions().setAddress("log.output"))
 				.addOutboundPermitted(new PermittedOptions().setAddress("red.move"))
-				.addOutboundPermitted(new PermittedOptions().setAddress("white.move"));
+				.addOutboundPermitted(new PermittedOptions().setAddress("white.move"))
+				.addOutboundPermitted(new PermittedOptions().setAddress("game.over"));
 
 		// Create the event bus bridge and add it to the router.
 		SockJSHandler ebHandler = SockJSHandler.create(vertx);
@@ -70,5 +68,10 @@ public class Server extends AbstractVerticle {
 			consumerRoute.gameOver(color);
 			requestHandler.response().end();
 		});
+	}
+	
+	public static void log(String content) {
+		System.out.println(content);
+		eb.publish("log.output", content);
 	}
 }
