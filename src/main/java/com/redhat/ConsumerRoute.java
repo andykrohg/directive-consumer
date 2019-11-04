@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
@@ -33,9 +31,6 @@ public class ConsumerRoute extends RouteBuilder {
 	
 	@Override
 	public void configure() throws Exception {
-		System.out.println("Hi");
-		restConfiguration().component("servlet").port(8080).bindingMode(RestBindingMode.json);
-		
 		Properties props = new Properties();
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("kafka.properties"));
 		props.load(ConsumerRoute.class.getClassLoader().getResourceAsStream("datagrid.properties"));
@@ -81,67 +76,17 @@ public class ConsumerRoute extends RouteBuilder {
 			.streamCaching()
 			.unmarshal().json(JsonLibrary.Jackson, Map.class)
 			.process(new InputProcessor(whiteInputs, "white"));
-	
-		rest("/move")
-			.get("/{color}").route()
-			.streamCaching()
-			.recipientList(simple("direct:${header.color}-processor"));
 		
+		from("timer://move?fixedRate=true&period=500")
+			.multicast().to("direct:red-processor", "direct:white-processor");
 		
 		from("direct:red-processor")
 			.process(new DirectiveProcessor(redUserData, redInputs, "red", redKieSession));
 		from("direct:white-processor")
 			.process(new DirectiveProcessor(whiteUserData, whiteInputs, "white", whiteKieSession));
-		
-		rest("/start")
-			.get().route().process(new Processor() {
-				@Override
-				public void process(Exchange exchange) throws Exception {
-					startGame();
-				}
-			});
-		
-		rest("/rest")
-			.get("/gameOver/{color}").route()
-			.process(new Processor() {
-				@Override
-				public void process(Exchange exchange) throws Exception {
-					if (gameOver) {
-						return;
-					}
-					gameOver = true;
-					
-					String winner = exchange.getIn().getHeader("color", String.class);
-					String message = winner.equals("red") ? 
-							DirectiveProcessor.ANSI_RED + "TEAM RED HAT WINS!!!" + DirectiveProcessor.ANSI_RESET:
-								DirectiveProcessor.ANSI_WHITE + "TEAM WHITE HAT WINS!!!" + DirectiveProcessor.ANSI_RESET;
-					
-					//Clear the console
-					System.out.print("\033[H\033[2J");  
-				    System.out.flush(); 
-			
-				    //Display winner banner
-					System.out.println(message + "\n\n");
-					
-					//Display Red Team data
-					System.out.println(DirectiveProcessor.ANSI_RED + "Team Red Hat Data" + DirectiveProcessor.ANSI_RESET);
-					System.out.println("MVP: " + findMVP(redUserData));
-					System.out.println("Biggest Troll: " + findTroll(redUserData) + "\n\n");
-					
-					//Display White Team data
-					System.out.println(DirectiveProcessor.ANSI_WHITE + "Team White Hat Data" + DirectiveProcessor.ANSI_RESET);
-					System.out.println("MVP: " + findMVP(whiteUserData));
-					System.out.println("Biggest Troll: " + findTroll(whiteUserData));
-				}
-			});
-		
-		rest("/join-link")
-			.get().route().setBody(constant(System.getenv("JOIN_LINK")));
 	}
 	
-	private void startGame() throws Exception {
-		System.out.print("\033[H\033[2J");  
-	    System.out.flush(); 
+	public void startGame() throws Exception {
 	    System.out.println("3...");
 	    Thread.sleep(1000);
 	    System.out.println("2...");
@@ -153,6 +98,30 @@ public class ConsumerRoute extends RouteBuilder {
 		redUserData.clear();
 		whiteUserData.clear();
 		gameOver = false;
+	}
+	
+	public void gameOver(String winningColor) {
+		if (gameOver) {
+			return;
+		}
+		gameOver = true;
+
+		String message = winningColor.equals("red") ? 
+				"TEAM RED HAT WINS!!!" :
+					"TEAM WHITE HAT WINS!!!" ;
+
+	    //Display winner banner
+		System.out.println(message + "\n\n");
+		
+		//Display Red Team data
+		System.out.println("Team Red Hat Data");
+		System.out.println("MVP: " + findMVP(redUserData));
+		System.out.println("Biggest Troll: " + findTroll(redUserData) + "\n\n");
+		
+		//Display White Team data
+		System.out.println("Team White Hat Data");
+		System.out.println("MVP: " + findMVP(whiteUserData));
+		System.out.println("Biggest Troll: " + findTroll(whiteUserData));
 	}
 	
 	private String findMVP(Map<String, Integer> userData) {

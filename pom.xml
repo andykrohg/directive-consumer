@@ -80,11 +80,6 @@
             <artifactId>jboss-marshalling-osgi</artifactId>
             <version>2.0.6.Final-redhat-00001</version>
         </dependency>
-
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-servlet</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jackson</artifactId>
@@ -93,23 +88,6 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-kafka</artifactId>
 		</dependency>
-		<dependency>
-                        <groupId>org.apache.camel</groupId>
-                       <artifactId>camel-cdi</artifactId>
-               </dependency>
-               <dependency>
-                       <groupId>org.apache.camel</groupId>
-                       <artifactId>camel-servlet-starter</artifactId>
-               </dependency>
-               <dependency>
-                       <groupId>org.apache.camel</groupId>
-                     <artifactId>camel-jackson-starter</artifactId>
-                     </dependency>
-                     <dependency>
-                       <groupId>javax.enterprise</groupId>
-                       <artifactId>cdi-api</artifactId>
-               </dependency>
-
 	</dependencies>
 	<repositories>
 		<repository>
