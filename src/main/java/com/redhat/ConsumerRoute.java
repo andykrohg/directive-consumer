@@ -53,7 +53,7 @@ public class ConsumerRoute extends RouteBuilder {
 		getContext().addComponent("kafka", kafka);
 		
 		//configure Data Grid
-		props.put("infinispan.client.hotrod.server_list", System.getenv("DATAGRID_HOST") + ":443");
+		props.put("infinispan.client.hotrod.server_list", System.getenv("DATAGRID_HOST") + System.getenv("DATAGRID_PORT"));
 		props.put("infinispan.client.hotrod.sni_host_name", System.getenv("DATAGRID_HOST"));
 
 		TrustStore.createFromCrtFile("/tmp/certs/datagrid/tls.crt",
