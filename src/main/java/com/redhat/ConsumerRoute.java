@@ -55,6 +55,8 @@ public class ConsumerRoute extends RouteBuilder {
 		//configure Data Grid
 		props.put("infinispan.client.hotrod.server_list", System.getenv("DATAGRID_HOST") + ":" + System.getenv("DATAGRID_PORT"));
 		props.put("infinispan.client.hotrod.sni_host_name", System.getenv("DATAGRID_HOST"));
+		props.put("infinispan.client.hotrod.auth_username", System.getenv("DATAGRID_USERNAME"));
+		props.put("infinispan.client.hotrod.auth_password", System.getenv("DATAGRID_PASSWORD"));
 
 		TrustStore.createFromCrtFile("/tmp/certs/datagrid/tls.crt",
 			props.getProperty("infinispan.client.hotrod.trust_store_file_name"),
