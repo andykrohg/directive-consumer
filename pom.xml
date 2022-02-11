@@ -15,7 +15,7 @@
 		<fuse.version>7.4.0.fuse-740036-redhat-00002</fuse.version>
 		<spring-boot.version>1.5.4.RELEASE</spring-boot.version>
 		<version.org.infinispan>9.4.6.Final-redhat-00002</version.org.infinispan>
-		<vertx.version>3.8.2</vertx.version>
+		<vertx.version>3.9.4</vertx.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
